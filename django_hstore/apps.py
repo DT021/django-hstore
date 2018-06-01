@@ -2,6 +2,7 @@ import sys
 
 import django
 from django.conf import settings
+from django.db import connections
 from django.db.backends.signals import connection_created
 from django.apps import AppConfig
 
@@ -86,6 +87,9 @@ class HStoreConfig(AppConfig):
     verbose = 'Django HStore'
 
     def ready(self):
+        for conn in connections.all():
+            if conn.connection is not None:
+                register_hstore_handler(conn)
         connection_created.connect(connection_handler,
                                    weak=CONNECTION_CREATED_SIGNAL_WEAKREF,
                                    dispatch_uid="_connection_create_handler")
